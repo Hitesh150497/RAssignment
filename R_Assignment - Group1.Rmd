@@ -1,0 +1,215 @@
+---
+title: "R_Assignment - Group1"
+output: pdf_document
+header-includes:
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \fancyfoot[CO,CE]{https://github.com/Hitesh150497/RAssignment-Group1.git}
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggpubr)
+library(tidyverse)
+library(janitor)
+library(here)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+## Using the data provided by one of my professors in the analytics program. I do not have a link but only csv file.
+## This code works perfectly on my machine, as i have this file in a same folder but if it does not work on your end,you could simply import it.
+
+```{r echo=TRUE}
+Cereals <- read.csv("Cereals.csv", header=TRUE)
+```
+
+
+## Q1. Provide a introduction of your analysis in the .RMD file so it can be produced in the output.
+
+## Introduction to dataset:
+##The following dataset contains the different nutritional values for various cereal brands. Using this data, we can find out that which cereals are best healthwise. Moreover, looking at different variables like sodium, fat, protein, carbohydrates, we can presumably recommend the best suited cereal brands to the customer according to their needs.
+
+
+## Q2. Print the structure of your dataset.
+```{r echo=TRUE}
+Cereals
+```
+
+
+## Q3. List the variables in your dataset.
+```{r echo=TRUE}
+names(Cereals)
+```
+
+
+## Q4. Print the top 15 rows of your dataset.
+```{r echo=TRUE}
+head(Cereals,n=15)
+```
+
+
+## Q5. Write a user defined function using any of the variables from the data set.
+## Here we are using sodium variable from our dataset, and doing it square.
+```{r echo=TRUE}
+sodium_square<-function(x)
+{
+  result=x*x
+  result
+}
+sodium_square(Cereals$sodium)
+```
+
+
+
+
+## Q6.Use data manipulation techniques and filter rows based on any logical criteria that exist in your dataset.
+
+## Here we are filtering our data, we are just considering rows which has sodium more than 130.
+
+```{r echo=TRUE}
+library(dplyr)
+sample1 = filter(Cereals,sodium>100)
+sample1
+```
+
+
+
+
+## Q7.Identify the dependent & independent variables and use reshaping techniques and create a new data frame by joining those variables from your dataset
+
+## Looking at data, rating (variable) is dependent on all the other variables and all the variables are independent to each other.
+
+## Here, we created a new datafrane with total 6 columns.
+
+```{r echo=TRUE}
+df = data.frame(Cereals %>% select(1:6))
+df
+```
+
+
+## Q8.Remove missing values in your dataset.
+```{r echo=TRUE}
+na_vec<-which(!complete.cases(Cereals))
+Cereals <- Cereals[-na_vec,]
+Cereals
+```
+## You can see from the data that now we have 3 less rows in our dataset after removing N/A values.
+
+
+## Q9. Identify and remove duplicated data in your dataset.
+```{r echo=TRUE}
+Cereals<-Cereals[!duplicated(Cereals),]
+Cereals
+```
+## It shows that we do not have any duplicate values in our dataset.
+
+
+
+## Q10.Reorder multiple rows in descending order.
+## Here, we are sorting the rows based on ratings in descending order.
+```{r echo=TRUE}
+Cereals <- arrange(Cereals,desc(Cereals$rating))
+Cereals
+```
+
+
+## Q11. Rename some of the column names in your dataset.
+## Here, We have renamed the two variables, 1: name to Cereals Names, and 2: carbo to carbohydrates.
+```{r echo=TRUE}
+names(Cereals)[names(Cereals) == "name"] <- "Cereals Names" 
+names(Cereals)[names(Cereals) == "carbo"] <- "carbohydrates"
+Cereals
+```
+
+
+## Q12. Add new variables in your data frame by using a mathematical function (for e.g. – multiply an existing column by 2 and add it as a new variable to your data frame).
+## Here, we have created a new variable called double_calories by using calories varibale, we multplied calories by 2 and stored in double_calories.
+```{r echo=TRUE}
+Cereals %>% mutate(double_calories = calories*2)
+
+```
+
+## Q13. Create a training set using random number generator engine.
+## created training and test dataset using random number engine.
+```{r echo=TRUE}
+set.seed(74)
+h <- runif(nrow(Cereals))
+c <- Cereals[order(h), ]
+train <- c[1:45, ]
+test <- c[46:74, ]
+str(train)
+str(test)
+```
+
+
+## Q14.Print the summary statistics of your dataset.
+## Summary Statistics of dataset.
+```{r echo=TRUE}
+summary(Cereals)
+```
+
+
+## Q15. Use any of the numerical variables from the dataset and perform the following statistical functions
+## we are using protein for our statistical analysis
+```{r echo=TRUE}
+
+# 1.Mean 
+cat("The mean value for protein is:", mean(Cereals$protein), "\n");
+
+# 2. Median
+cat("The median value for protein is:", median(Cereals$protein), "\n");
+
+# 3.Mode
+# R does not have any in-built function for mode, so we had to create a function for it.
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+v <- Cereals$protein
+result <- getmode(v)
+
+cat("The mode value for protein is:", result, "\n");
+# 4.Range
+cat("The range values for protein is:", range(Cereals$protein))
+```
+
+## Q16. Plot a scatter plot for any 2 variables in your dataset.
+## The scatterplot for Calories and carbohydrates.
+```{r echo=TRUE}
+plot(Cereals$calories,Cereals$carbohydrates)
+```
+
+## Q17. Plot a bar plot for any 2 variables in your dataset.
+## Created 3 different barplots with 3 different variables.
+```{r echo=TRUE}
+barplot(Cereals$protein)
+barplot(Cereals$fat)
+barplot(Cereals$calories)
+```
+
+
+## Q18. Find the correlation between any 2 variables by applying least square linear regression model.
+```{r echo=TRUE}
+X = Cereals[,"carbohydrates"]
+Y = Cereals[,"calories"]
+CORRELATION = cor(Y,X,method = "pearson")
+CORRELATION
+```
+
+
+## Q19. Provide a conclusion of your analysis.
+## Well, the complete analysis has to be done, which will require us to look at all the variables, finding correlations of variables with each other. plotting more graphs.But, with the given analysis, we can say that carbohydrates and calories are somewhat proportional with a positive correlation.
+
+
+```{r,include=FALSE}
+options(tinytex.verbose = TRUE)
+```
+
+
